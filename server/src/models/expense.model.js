@@ -2,7 +2,12 @@ import pool from '../config/db.js';
 
 export const getAllExpenses = async (userId) => {
   const [rows] = await pool.execute(
-    'SELECT id,title, amount, type, description, date, category_id, created_at FROM expenses WHERE user_id= ? ORDER BY date DESC',
+    `SELECT e.id, e.title, e.amount, e.type, e.description, e.date, e.category_id, e.created_at,
+            c.name AS category_name, c.color AS category_color
+     FROM expenses e
+     LEFT JOIN categories c ON e.category_id = c.id
+     WHERE e.user_id = ?
+     ORDER BY e.date DESC`,
     [userId]
   );
   return rows;
@@ -10,7 +15,11 @@ export const getAllExpenses = async (userId) => {
 
 export const getExpenseById = async (id, userId) => {
   const [rows] = await pool.execute(
-    'SELECT id, title, amount, type, description, date, category_id, created_at FROM expenses Where id = ? AND user_id = ?',
+    `SELECT e.id, e.title, e.amount, e.type, e.description, e.date, e.category_id, e.created_at,
+            c.name AS category_name, c.color AS category_color
+     FROM expenses e
+     LEFT JOIN categories c ON e.category_id = c.id
+     WHERE e.id = ? AND e.user_id = ?`,
     [id, userId]
   );
   return rows[0];

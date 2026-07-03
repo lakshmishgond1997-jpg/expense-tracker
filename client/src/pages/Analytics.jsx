@@ -113,15 +113,25 @@ function Analytics() {
     return (total / uniqueDays).toFixed(0);
   }, [onlyExpenses]);
 
-  const mostSpentCategory = useMemo(() => {
+  // Pie chart — spending by category
+  const categoryData = useMemo(() => {
     const map = {};
     onlyExpenses.forEach((e) => {
-      const key = e.category_id || 'Uncategorized';
-      map[key] = (map[key] || 0) + parseFloat(e.amount);
+      const key = e.category_name || 'Uncategorized';
+      if (!map[key]) {
+        map[key] = { name: key, value: 0, color: e.category_color || '#9ca3af' };
+      }
+      map[key].value += parseFloat(e.amount);
     });
-    const top = Object.entries(map).sort((a, b) => b[1] - a[1])[0];
-    return top ? `₹${parseFloat(top[1]).toLocaleString('en-IN')}` : '—';
+    return Object.values(map).sort((a, b) => b.value - a.value);
   }, [onlyExpenses]);
+
+  const mostSpentCategory = useMemo(() => {
+    const top = categoryData[0];
+    return top
+      ? { name: top.name, amount: `₹${top.value.toLocaleString('en-IN')}` }
+      : null;
+  }, [categoryData]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -151,14 +161,19 @@ function Analytics() {
           <div className="bg-white rounded-2xl p-5 border border-gray-100">
             <p className="text-sm text-gray-400 mb-1">Top category spend</p>
             <p className="text-2xl font-semibold text-gray-800">
-              {mostSpentCategory}
+              {mostSpentCategory ? mostSpentCategory.amount : '—'}
             </p>
+            {mostSpentCategory && (
+              <p className="text-xs text-gray-400 mt-1">
+                {mostSpentCategory.name}
+              </p>
+            )}
           </div>
         </div>
 
         {/* Charts row */}
-        <div className="grid grid-cols-2 gap-6 mb-8">
-          {/* Pie chart */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Pie chart — income vs expenses */}
           <div className="bg-white rounded-2xl p-6 border border-gray-100">
             <h2 className="font-semibold text-gray-800 mb-6">
               Income vs expenses
@@ -197,6 +212,52 @@ function Analytics() {
                   <div
                     className="w-3 h-3 rounded-full"
                     style={{ background: COLORS[index] }}
+                  />
+                  <span className="text-sm text-gray-500">{entry.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Pie chart — spending by category */}
+          <div className="bg-white rounded-2xl p-6 border border-gray-100">
+            <h2 className="font-semibold text-gray-800 mb-6">
+              Spending by category
+            </h2>
+            {categoryData.length === 0 ? (
+              <div className="text-center text-gray-400 text-sm py-12">
+                No data yet
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={240}>
+                <PieChart>
+                  <Pie
+                    data={categoryData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {categoryData.map((entry, index) => (
+                      <Cell key={index} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value) =>
+                      `₹${parseFloat(value).toLocaleString('en-IN')}`
+                    }
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-4">
+              {categoryData.map((entry) => (
+                <div key={entry.name} className="flex items-center gap-2">
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ background: entry.color }}
                   />
                   <span className="text-sm text-gray-500">{entry.name}</span>
                 </div>

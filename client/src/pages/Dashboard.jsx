@@ -146,6 +146,7 @@ function Dashboard() {
                 <tr className="text-left text-xs text-gray-400 border-b border-gray-100">
                   <th className="px-6 py-3 font-medium">Title</th>
                   <th className="px-6 py-3 font-medium">Type</th>
+                  <th className="px-6 py-3 font-medium">Category</th>
                   <th className="px-6 py-3 font-medium">Date</th>
                   <th className="px-6 py-3 font-medium text-right">Amount</th>
                   <th className="px-6 py-3 font-medium text-right">Actions</th>
@@ -170,6 +171,18 @@ function Dashboard() {
                       >
                         {expense.type}
                       </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      {expense.category_name ? (
+                        <span
+                          className="text-xs px-2 py-1 rounded-full font-medium text-white"
+                          style={{ background: expense.category_color }}
+                        >
+                          {expense.category_name}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-300">—</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-400">
                       {new Date(expense.date).toLocaleDateString('en-IN')}
