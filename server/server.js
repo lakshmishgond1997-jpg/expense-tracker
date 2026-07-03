@@ -9,7 +9,15 @@ import expenseRoutes from './src/routes/expense.routes.js';
 import categoryRoutes from './src/routes/category.routes.js';
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      'http://localhost:5173',
+      'https://expense-tracker-one-blush-80.vercel.app',
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/expenses', expenseRoutes);
