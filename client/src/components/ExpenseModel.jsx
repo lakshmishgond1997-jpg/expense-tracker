@@ -40,12 +40,20 @@ function ExpenseModal({ onClose, expense }) {
     setError('');
     setLoading(true);
     try {
+      const selectedCategory = categories.find(
+        (c) => String(c.id) === String(formData.category_id)
+      );
+      const categoryFields = {
+        category_name: selectedCategory?.name || null,
+        category_color: selectedCategory?.color || null,
+      };
       if (isEdit) {
         await api.put(`/expenses/${expense.id}`, formData);
         dispatch(
           updateExpense({
             ...expense,
             ...formData,
+            ...categoryFields,
             amount: parseFloat(formData.amount),
           })
         );
@@ -55,6 +63,7 @@ function ExpenseModal({ onClose, expense }) {
           addExpense({
             id: res.data.expenseId,
             ...formData,
+            ...categoryFields,
             amount: parseFloat(formData.amount),
           })
         );
